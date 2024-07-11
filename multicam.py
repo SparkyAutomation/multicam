@@ -11,9 +11,6 @@ import cv2
 from picamera2 import Picamera2  # Corrected import name
 from styles import stylesheet  # uncomment if you have a stylesheet module
 
-# Set Qt platform plugin path
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/usr/lib/aarch64-linux-gnu/qt5/plugins/platforms/'
-
 class VideoFeedWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -23,11 +20,11 @@ class VideoFeedWidget(QWidget):
             print("Error: Could not open USB camera.")
             return
         
-        self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        #self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        #self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         
         self.image_label = QLabel()
-        self.image_label.setFixedSize(640, 480)
+        self.image_label.setFixedSize(480, 320)
         
         layout = QVBoxLayout()
         layout.addWidget(self.image_label)
@@ -95,7 +92,7 @@ class DesktopFileCreator(QWidget):
     def initUI(self):
         self.setWindowTitle('MultiCam')
         self.setWindowIcon(QIcon('multicam.png'))  
-        self.setGeometry(200, 50, 800, 600)  # Adjusted size for accommodating live view
+        self.setGeometry(200, 50, 480, 320)  # Adjusted size for accommodating live view
 
         layout = QVBoxLayout(self)
         
@@ -168,6 +165,3 @@ if __name__ == '__main__':
     window = DesktopFileCreator()
     window.show()
     sys.exit(app.exec_())
-
-
-
