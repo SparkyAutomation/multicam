@@ -2,6 +2,7 @@ https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/8MP-IMX219/#bookworm-
 https://www.raspberrypi.com/documentation/computers/camera_software.html
 https://www.raspberrypi.com/documentation/accessories/camera.html
 https://www.raspberrypi.com/documentation/computers/camera_software.html#use-multiple-cameras
+https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf?_gl=1*nuxptn*_ga*ODY0NzEwOTguMTcyMDY2MDI0NQ..*_ga_22FD70LWDS*MTcyMDY3NjY0My4yLjEuMTcyMDY3NzA5MC4wLjAuMA..
 
 sudo apt update
 sudo apt install libcamera-utils
