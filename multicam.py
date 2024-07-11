@@ -2,11 +2,39 @@ import os
 import sys
 sys.path.append('/usr/local/bin')  # Add the directory to sys.path
 
-from picamera2 import Picamera2  # Corrected import name
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QDateTime, QTimer
+from PyQt5.QtCore import QDateTime, QTimer, QThread, pyqtSignal
+from picamera2 import Picamera2  # Corrected import name
 from styles import stylesheet  # uncomment if you have a stylesheet module
+
+class ImageCaptureThread(QThread):
+    update_status = pyqtSignal(str)
+    finished = pyqtSignal()
+
+    def __init__(self, image_directory, parent=None):
+        super().__init__(parent)
+        self.image_directory = image_directory
+        self.success = True
+
+    def run(self):
+        timestamp = QDateTime.currentDateTime().toString("yyyyMMdd-hhmmss")
+
+        for i in range(3):
+            try:
+                picam = Picamera2(i)  # create PiCamera instance
+                picam.start()
+                filename = os.path.join(self.image_directory, f'cam{i}_{timestamp}.jpg')  # Unique filename based on timestamp
+                picam.capture_file(filename)
+                picam.stop()
+                picam.close()
+                self.update_status.emit(f"Picture {i+1} taken successfully")
+            except Exception as e:
+                self.update_status.emit(f"Error capturing picture from camera {i}: {str(e)}")
+                self.success = False
+                break
+
+        self.finished.emit()
 
 class DesktopFileCreator(QWidget):
     def __init__(self):
@@ -35,35 +63,23 @@ class DesktopFileCreator(QWidget):
         # Define the directory to save images
         self.image_directory = '/home/sparky/multiimg'
         os.makedirs(self.image_directory, exist_ok=True)  # Create directory if it doesn't exist
-        
+
     def take_picture(self):
         self.cleanup_cameras()  # Ensure any existing cameras are stopped before capturing new pictures
-        timestamp = QDateTime.currentDateTime().toString("yyyyMMdd-hhmmss")
+        self.status_label.setText("Taking images...")  # Update status label
+        
+        # Create and start the image capture thread
+        self.capture_thread = ImageCaptureThread(self.image_directory)
+        self.capture_thread.update_status.connect(self.update_status_label)
+        self.capture_thread.finished.connect(self.reset_status_label)
+        self.capture_thread.start()
 
-        success = True  # Flag to check if all pictures were taken successfully
+    def update_status_label(self, message):
+        self.status_label.setText(message)
 
-        for i in range(3):
-            try:
-                picam = Picamera2(i)  # create PiCamera instance
-                picam.start()
-                self.picameras.append(picam)  # Add to list to manage instances
-                filename = os.path.join(self.image_directory, f'cam{i}_{timestamp}.jpg')  # Unique filename based on timestamp
-                picam.capture_file(filename)
-                picam.stop()
-                picam.close()
-            except Exception as e:
-                error_message = f"Error capturing picture from camera {i}: {str(e)}"
-                self.status_label.setText(error_message)
-                success = False
-                break
-
-        if success:
-            self.status_label.setText("Pictures taken successfully")
-        else:
-            self.status_label.setText("Failed to take pictures")
-
-        # Reset status label after 3 seconds
-        QTimer.singleShot(3000, lambda: self.status_label.setText("Camera is ready"))
+    def reset_status_label(self):
+        # Reset status label after 1 second
+        QTimer.singleShot(1000, lambda: self.status_label.setText("Camera is ready"))
 
     def cleanup_cameras(self):
         for picam in self.picameras:
