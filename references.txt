@@ -1,3 +1,10 @@
 https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/8MP-IMX219/#bookworm-os-pi-5
 https://www.raspberrypi.com/documentation/computers/camera_software.html
 https://www.raspberrypi.com/documentation/accessories/camera.html
+
+sudo apt update
+sudo apt install libcamera-utils
+
+cam -l # list all the cameras.
+
+
