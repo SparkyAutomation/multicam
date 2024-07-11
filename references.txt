@@ -8,3 +8,29 @@ sudo apt install libcamera-utils
 cam -l # list all the cameras.
 
 
+cameras:
+  - name: imx219_1
+    camera_id: 0
+    fmt:
+      width: 1920
+      height: 1080
+      pixelformat: YUV420
+
+  - name: imx219_2
+    camera_id: 1
+    fmt:
+      width: 1280
+      height: 720
+      pixelformat: YUV420
+
+  - name: usb_camera
+    camera_id: 2
+    fmt:
+      width: 640
+      height: 480
+      pixelformat: YUYV
+
+
+cam -c config.yaml
+
+cam -o output.jpg -n 1 # o for output, n for cam number.
