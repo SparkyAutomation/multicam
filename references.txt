@@ -96,3 +96,16 @@ picam2a.start()
 picam2a.capture_file("cam0.jpg")
 picam2a.stop()
 
+### screen setup:
+
+Step 1，If the driver is not installed, execute the following command (Raspberry Pi needs to connected to the Internet):
+sudo rm -rf LCD-show
+git clone https://github.com/goodtft/LCD-show.git
+chmod -R 755 LCD-show
+cd LCD-show/
+sudo ./LCD35-show  
+After execution, the driver will be installed.
+
+Step 2，If the driver is already installed, execute the following command:
+cd LCD-show/
+sudo ./rotate.sh 90
