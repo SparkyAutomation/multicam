@@ -34,3 +34,5 @@ cameras:
 cam -c config.yaml
 
 cam -o output.jpg -n 1 # o for output, n for cam number.
+
+pip install picamera
