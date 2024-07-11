@@ -7,90 +7,17 @@ https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf?_gl=1*nuxptn*_ga*
 sudo apt update
 sudo apt install libcamera-utils
 
-cam -l # list all the cameras.
-
-
-cameras:
-  - name: imx219_1
-    camera_id: 0
-    fmt:
-      width: 1920
-      height: 1080
-      pixelformat: YUV420
-
-  - name: imx219_2
-    camera_id: 1
-    fmt:
-      width: 1280
-      height: 720
-      pixelformat: YUV420
-
-  - name: usb_camera
-    camera_id: 2
-    fmt:
-      width: 640
-      height: 480
-      pixelformat: YUYV
-
-
-cam -c config.yaml
-
-cam -o output.jpg -n 1 # o for output, n for cam number.
-
-rpicam-jpeg --output test.jpg --timeout 2000 --width 640 --height 480
-rpicam-jpeg --output test.jpg --nopreview --width 640 --height 480
-
-import cv2
-import subprocess
-
-# Define the command as a list of strings
-command1 = [
-    'rpicam-jpeg',
-    '--output', 'test.jpg',
-    '--nopreview',
-    '--width', '640',
-    '--height', '480',
-    '--camera', '0'
-]
-
-
-def get_rgb():
-    # Open the webcam (use 0 if you have only one webcam, otherwise specify the correct index)
-    cap = cv2.VideoCapture(0)
-
-    if not cap.isOpened():
-        print("Error: Could not open webcam.")
-        return
-
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-
-    if not ret:
-        print("Error: Failed to capture image.")
-        return
-
-    # Release the webcam
-    cap.release()
-
-    # Save the captured frame as an image file
-    cv2.imwrite('captured_image.jpg', frame)
-    print("Image captured and saved as captured_image.jpg")
-
-if __name__ == "__main__":
-    # Run the command using subprocess
-	subprocess.run(command1)
-
+### configuration files
 sudo nano /boot/firmware/config.txt
 camera_auto_detect=0
 dtoverlay=imx219,cam0
 dtoverlay=imx219,cam1
 
-
+### Camera test
 from picamera2 import Picamera2
 
 print(Picamera2.global_camera_info())
 
-'''
 picam2a = Picamera2(1)
 picam2a.start()
 picam2a.capture_file("cam0.jpg")
