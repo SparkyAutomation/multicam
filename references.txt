@@ -40,8 +40,10 @@ cd LCD-show/
 sudo ./rotate.sh 90
 
 chmod +x /home/sparky/multicam/main.py
+sudo nano /etc/profile
+# add the following in the end
+sudo /usr/bin/python3 /home/sparky/multicam/main.py &
 
-crontab -e
 add this:
 @reboot /home/sparky/multicam/main.py
 
