@@ -38,3 +38,10 @@ After execution, the driver will be installed.
 Step 2，If the driver is already installed, execute the following command:
 cd LCD-show/
 sudo ./rotate.sh 90
+
+chmod +x /home/sparky/multicam/main.py
+
+crontab -e
+add this:
+@reboot /home/sparky/multicam/main.py
+
