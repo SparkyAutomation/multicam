@@ -5,7 +5,9 @@ https://www.raspberrypi.com/documentation/computers/camera_software.html#use-mul
 https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf?_gl=1*nuxptn*_ga*ODY0NzEwOTguMTcyMDY2MDI0NQ..*_ga_22FD70LWDS*MTcyMDY3NjY0My4yLjEuMTcyMDY3NzA5MC4wLjAuMA..
 
 sudo apt update
-sudo apt install libcamera-utils
+sudo apt install -y python3-picamera2
+sudo apt install -y python3-opencv
+sudo apt install -y opencv-data
 
 ### configuration files
 sudo nano /boot/firmware/config.txt
