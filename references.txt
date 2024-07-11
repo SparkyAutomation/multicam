@@ -80,6 +80,11 @@ if __name__ == "__main__":
     # Run the command using subprocess
 	subprocess.run(command1)
 
+sudo nano /boot/firmware/config.txt
+camera_auto_detect=0
+dtoverlay=imx219,cam0
+dtoverlay=imx219,cam1
+
 
 from picamera2 import Picamera2
 
