@@ -1,6 +1,7 @@
 https://docs.arducam.com/Raspberry-Pi-Camera/Native-camera/8MP-IMX219/#bookworm-os-pi-5
 https://www.raspberrypi.com/documentation/computers/camera_software.html
 https://www.raspberrypi.com/documentation/accessories/camera.html
+https://www.raspberrypi.com/documentation/computers/camera_software.html#use-multiple-cameras
 
 sudo apt update
 sudo apt install libcamera-utils
@@ -36,3 +37,4 @@ cam -c config.yaml
 cam -o output.jpg -n 1 # o for output, n for cam number.
 
 rpicam-jpeg --output test.jpg --timeout 2000 --width 640 --height 480
+rpicam-jpeg --output test.jpg --nopreview --width 640 --height 480
