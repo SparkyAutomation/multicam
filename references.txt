@@ -44,6 +44,3 @@ sudo nano /etc/profile
 # add the following in the end
 sudo /usr/bin/python3 /home/sparky/multicam/main.py &
 
-add this:
-@reboot /home/sparky/multicam/main.py
-
