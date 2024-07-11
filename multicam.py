@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append('/usr/local/bin')  # Add the directory to sys.path
 
-from picamera2 import Picamera2, Preview
+from picamera2 import Picamera2  # Corrected import name
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QDateTime
@@ -14,7 +14,7 @@ class DesktopFileCreator(QWidget):
         self.setStyleSheet(stylesheet)  # uncomment if you have a stylesheet
         self.initUI()
         self.process = None  # Initialize QProcess instance
-        self.picameras = []  # List to hold Picamera2 instances
+        self.picameras = []  # List to hold PiCamera2 instances
 
     def initUI(self):
         self.setWindowTitle('MultiCam')
@@ -43,6 +43,7 @@ class DesktopFileCreator(QWidget):
                 filename = os.path.join(self.image_directory, f'cam{i}_{timestamp}.jpg')  # Unique filename based on timestamp
                 picam.capture_file(filename)
                 picam.stop()
+                picam.close()
             except Exception as e:
                 print(f"Error capturing picture from camera {i}: {str(e)}")
 
@@ -50,6 +51,7 @@ class DesktopFileCreator(QWidget):
         for picam in self.picameras:
             try:
                 picam.stop()
+                picam.close()
             except Exception as e:
                 print(f"Error stopping camera: {str(e)}")
         self.picameras.clear()  # Clear the list of cameras
@@ -63,3 +65,4 @@ if __name__ == '__main__':
     window = DesktopFileCreator()
     window.show()
     sys.exit(app.exec_())
+
