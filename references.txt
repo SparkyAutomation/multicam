@@ -79,5 +79,15 @@ def get_rgb():
 if __name__ == "__main__":
     # Run the command using subprocess
 	subprocess.run(command1)
-    
+
+
+from picamera2 import Picamera2
+
+print(Picamera2.global_camera_info())
+
+'''
+picam2a = Picamera2(1)
+picam2a.start()
+picam2a.capture_file("cam0.jpg")
+picam2a.stop()
 
