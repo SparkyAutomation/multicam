@@ -64,11 +64,15 @@ class ImageCaptureThread(QThread):
         for i in range(3):
             try:
                 picam = Picamera2(i)
+                camera_config = picam.create_still_configuration(main={"size": (3280, 2464)})
+                picam.configure(camera_config)
+                
                 picam.start()
                 filename = os.path.join(self.image_directory, f'cam{i}_{timestamp}.jpg')
                 picam.capture_file(filename)
                 picam.stop()
                 picam.close()
+                
                 self.update_status.emit(f"Picture {i+1} taken successfully")
             except Exception as e:
                 self.update_status.emit(f"Error capturing picture from camera {i}: {str(e)}")
@@ -147,9 +151,8 @@ class DesktopFileCreator(QWidget):
     def cleanup_cameras(self):
         for picam in self.picameras:
             try:
-                # Replace with your PiCamera2 cleanup logic
-                # picam.stop()
-                # picam.close()
+                picam.stop()
+                picam.close()
                 pass
             except Exception as e:
                 print(f"Error stopping camera: {str(e)}")
@@ -165,4 +168,6 @@ if __name__ == '__main__':
     window = DesktopFileCreator()
     window.show()
     sys.exit(app.exec_())
+
+
 
