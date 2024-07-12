@@ -1,31 +1,29 @@
 import os
 import sys
-sys.path.append('/usr/local/bin')  # Add the directory to sys.path
-
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel
 from PyQt5.QtGui import QIcon, QImage, QPixmap
 from PyQt5.QtCore import QTimer, QDateTime, QThread, pyqtSignal
 import cv2
-
-# Assuming these imports are corrected based on your environment
-from picamera2 import Picamera2  # Corrected import name
+from gpiozero import Button
+from picamera2 import Picamera2  # Assuming this is the correct import
 from styles import stylesheet  # uncomment if you have a stylesheet module
 
 class VideoFeedWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setMinimumSize(400, 150)
         
         self.video_capture = cv2.VideoCapture(0)
         if not self.video_capture.isOpened():
             print("Error: Could not open USB camera.")
             return
         
-        #self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        #self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         
         self.image_label = QLabel()
-        self.image_label.setFixedSize(480, 320)
-        
+        self.image_label.setFixedSize(320, 240)
+
         layout = QVBoxLayout()
         layout.addWidget(self.image_label)
         
@@ -33,7 +31,7 @@ class VideoFeedWidget(QWidget):
         
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(1000 // 30)  # Update every 30 milliseconds (approximately 30 FPS)
+        self.timer.start(1000 // 30)
     
     def update_frame(self):
         ret, frame = self.video_capture.read()
@@ -83,65 +81,77 @@ class DesktopFileCreator(QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet(stylesheet)  # uncomment if you have a stylesheet
-        self.video_feed_widget = VideoFeedWidget()  # Initialize video feed widget
-        self.is_taking_picture = False  # Initialize is_taking_picture attribute
+        self.video_feed_widget = VideoFeedWidget()
+        self.is_taking_picture = False
         self.initUI()
         self.process = None
         self.picameras = []
-        
+        self.button = Button(21)
+        self.button.when_pressed = self.take_picture_gpio  # Connect GPIO button press event
+
     def initUI(self):
         self.setWindowTitle('MultiCam')
-        self.setWindowIcon(QIcon('multicam.png'))  
-        self.setGeometry(200, 50, 480, 320)  # Adjusted size for accommodating live view
+        self.setWindowIcon(QIcon('multicam.png'))
+        self.setGeometry(0, 30, 460, 150)
 
         layout = QVBoxLayout(self)
-        
-        # Add video feed widget
+
         layout.addWidget(self.video_feed_widget)
         
-        self.take_picture_button = QPushButton('Take Picture', self)
-        self.take_picture_button.clicked.connect(self.take_picture)
+        self.take_picture_button = QPushButton('Snap', self)
+        self.take_picture_button.clicked.connect(self.take_picture_gui)  # Connect GUI button click event
         layout.addWidget(self.take_picture_button)
 
-        # Label for status messages
         self.status_label = QLabel('Camera is ready', self)
         layout.addWidget(self.status_label)
 
         self.setLayout(layout)
         
-        # Define the directory to save images
         self.image_directory = '/home/sparky/multiimg'
-        os.makedirs(self.image_directory, exist_ok=True)  # Create directory if it doesn't exist
+        os.makedirs(self.image_directory, exist_ok=True)
 
-    def take_picture(self):
+    def take_picture_gui(self):
         if self.is_taking_picture:
             return
         
         self.is_taking_picture = True
-        self.cleanup_cameras()  # Ensure any existing cameras are stopped before capturing new pictures
-        self.status_label.setText("Taking images...")  # Update status label
+        self.cleanup_cameras()
+        self.status_label.setText("Taking images...")
         
-        # Stop live view
         self.video_feed_widget.video_capture.release()
         self.video_feed_widget.timer.stop()
         
-        # Create and start the image capture thread
         self.capture_thread = ImageCaptureThread(self.image_directory)
         self.capture_thread.update_status.connect(self.update_status_label)
         self.capture_thread.finished.connect(self.reset_status_label)
-        self.capture_thread.finished.connect(self.restart_live_view)  # Restart live view after capture
+        self.capture_thread.finished.connect(self.restart_live_view)
+        self.capture_thread.start()
+
+    def take_picture_gpio(self):
+        if self.is_taking_picture:
+            return
+        
+        self.is_taking_picture = True
+        self.cleanup_cameras()
+        self.status_label.setText("Taking images...")
+        
+        self.video_feed_widget.video_capture.release()
+        self.video_feed_widget.timer.stop()
+        
+        self.capture_thread = ImageCaptureThread(self.image_directory)
+        self.capture_thread.update_status.connect(self.update_status_label)
+        self.capture_thread.finished.connect(self.reset_status_label)
+        self.capture_thread.finished.connect(self.restart_live_view)
         self.capture_thread.start()
 
     def update_status_label(self, message):
         self.status_label.setText(message)
 
     def reset_status_label(self):
-        # Reset status label after 1 second
         QTimer.singleShot(1000, lambda: self.status_label.setText("Camera is ready"))
         self.is_taking_picture = False
 
     def restart_live_view(self):
-        # Restart live view after picture capture is complete
         self.video_feed_widget.video_capture.open(0)
         self.video_feed_widget.timer.start()
 
@@ -150,18 +160,18 @@ class DesktopFileCreator(QWidget):
             try:
                 picam.stop()
                 picam.close()
-                pass
             except Exception as e:
                 print(f"Error stopping camera: {str(e)}")
-        self.picameras.clear()  # Clear the list of cameras
+        self.picameras.clear()
 
     def closeEvent(self, event):
-        self.cleanup_cameras()  # Ensure cameras are stopped when the application closes
+        self.cleanup_cameras()
         event.accept()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = DesktopFileCreator()
     window.show()
     sys.exit(app.exec_())
+
+
